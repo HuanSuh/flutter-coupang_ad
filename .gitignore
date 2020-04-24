@@ -5,3 +5,6 @@
 .pub/
 
 build/
+
+.idea/
+example/ios/.symlinks/plugins/flutter_coupang_ad/

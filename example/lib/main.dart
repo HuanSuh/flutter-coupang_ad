@@ -18,7 +18,7 @@ class _MyAppState extends State<MyApp> {
           title: const Text('Plugin example app'),
         ),
         body: Center(
-          child: CoupangAdView(adId: '223812', height: 180),
+          child: CoupangAdView(CoupangAdConfig(adId: '223812', height: 180)),
         ),
       ),
     );

@@ -1,7 +1,6 @@
 name: flutter_coupang_ad
-description: A new Flutter plugin for coupang ad view.
-version: 0.0.1
-author: huansuh
+description: A Flutter plugin for coupang ad view provided by coupang partners.
+version: 0.1.0
 homepage: https://github.com/HuanSuh/flutter-coupang_ad
 
 environment:
@@ -10,8 +9,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-
-  url_launcher: ^5.4.5
 
 dev_dependencies:
   flutter_test:

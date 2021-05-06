@@ -6,11 +6,11 @@ import 'package:flutter/services.dart';
 class CoupangAdConfig {
   final String adId;
   final double height;
-  final double width;
+  final double? width;
 
   const CoupangAdConfig({
-    @required this.adId,
-    @required this.height,
+    required this.adId,
+    required this.height,
     this.width,
   });
 }
@@ -18,20 +18,20 @@ class CoupangAdConfig {
 class CoupangAdView extends StatefulWidget {
   final String adId;
   final double height; // default : 80px
-  final double width;
+  final double? width;
 
   CoupangAdView(CoupangAdConfig config)
-      : this.adId = config?.adId,
-        this.height = config?.height,
-        this.width = config?.width,
-        assert(config?.adId?.isNotEmpty == true);
+      : this.adId = config.adId,
+        this.height = config.height,
+        this.width = config.width,
+        assert(config.adId.isNotEmpty == true);
 
   @override
   _CoupangAdViewState createState() => _CoupangAdViewState();
 }
 
 class _CoupangAdViewState extends State<CoupangAdView> {
-  MethodChannel _channel;
+  late MethodChannel _channel;
 
   @override
   void didUpdateWidget(CoupangAdView oldWidget) {

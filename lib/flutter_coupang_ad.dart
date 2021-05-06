@@ -42,7 +42,7 @@ class _CoupangAdViewState extends State<CoupangAdView> {
   }
 
   void _onDataChanged(String adId) {
-    _channel?.invokeMethod(
+    _channel.invokeMethod(
         "onDataChanged", {"data": _constructHTMLData(adId, widget.height)});
   }
 
@@ -110,7 +110,7 @@ class _CoupangAdViewState extends State<CoupangAdView> {
     }
   }
 
-  String _constructHTMLData(String adId, double height) {
+  String _constructHTMLData(String adId, double? height) {
     String cleanHTML = '<div style="height: ${(height ?? 80).toInt()}px;">' +
         '<script src="https://ads-partners.coupang.com/g.js"></script>' +
         '<script> new PartnersCoupang.G({ id: $adId });</script>' +

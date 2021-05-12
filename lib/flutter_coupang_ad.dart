@@ -6,11 +6,11 @@ import 'package:flutter/services.dart';
 class CoupangAdConfig {
   final String adId;
   final double height;
-  final double width;
+  final double? width;
 
   const CoupangAdConfig({
-    @required this.adId,
-    @required this.height,
+    required this.adId,
+    required this.height,
     this.width,
   });
 }
@@ -18,20 +18,20 @@ class CoupangAdConfig {
 class CoupangAdView extends StatefulWidget {
   final String adId;
   final double height; // default : 80px
-  final double width;
+  final double? width;
 
   CoupangAdView(CoupangAdConfig config)
-      : this.adId = config?.adId,
-        this.height = config?.height,
-        this.width = config?.width,
-        assert(config?.adId?.isNotEmpty == true);
+      : this.adId = config.adId,
+        this.height = config.height,
+        this.width = config.width,
+        assert(config.adId.isNotEmpty == true);
 
   @override
   _CoupangAdViewState createState() => _CoupangAdViewState();
 }
 
 class _CoupangAdViewState extends State<CoupangAdView> {
-  MethodChannel _channel;
+  late MethodChannel _channel;
 
   @override
   void didUpdateWidget(CoupangAdView oldWidget) {
@@ -42,7 +42,7 @@ class _CoupangAdViewState extends State<CoupangAdView> {
   }
 
   void _onDataChanged(String adId) {
-    _channel?.invokeMethod(
+    _channel.invokeMethod(
         "onDataChanged", {"data": _constructHTMLData(adId, widget.height)});
   }
 
@@ -110,7 +110,7 @@ class _CoupangAdViewState extends State<CoupangAdView> {
     }
   }
 
-  String _constructHTMLData(String adId, double height) {
+  String _constructHTMLData(String adId, double? height) {
     String cleanHTML = '<div style="height: ${(height ?? 80).toInt()}px;">' +
         '<script src="https://ads-partners.coupang.com/g.js"></script>' +
         '<script> new PartnersCoupang.G({ id: $adId });</script>' +

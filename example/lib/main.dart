@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_coupang_ad/flutter_coupang_ad.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await FlutterCoupangAd.init('AF2693277', subId: 'dfhowmuch');
   runApp(const MyApp());
 }
 
@@ -17,10 +20,25 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
+        backgroundColor: Colors.red,
         appBar: AppBar(title: const Text('Flutter Coupang Ad')),
         body: Center(
           child: CoupangAdView(
-            const CoupangAdConfig(adId: '223812', height: 180),
+            adId: '575249',
+            size: CoupangAdSize.banner,
+            fillWidth: true,
+            listener: (event, data) {
+              print('$event : ${data.toString()}');
+              switch (event) {
+                case CoupangAdEvent.onAdClicked:
+                  break;
+                case CoupangAdEvent.onAdLoaded:
+                  break;
+                case CoupangAdEvent.onAdFailedToLoad:
+                case CoupangAdEvent.onError:
+                  break;
+              }
+            },
           ),
         ),
       ),

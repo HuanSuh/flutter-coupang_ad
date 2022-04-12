@@ -33,7 +33,7 @@ class AdViewFactory: NSObject, FlutterPlatformViewFactory {
     public func applicationWillEnterForeground() {}
 }
 
-class NativeAdView: NSObject, FlutterPlugin, FlutterStreamHandler, FlutterPlatformView, WKNavigationDelegate, WKUIDelegate {
+class NativeAdView: NSObject, FlutterPlugin, FlutterStreamHandler, FlutterPlatformView, WKScriptMessageHandler, WKNavigationDelegate, WKUIDelegate {
     
     static func register(with registrar: FlutterPluginRegistrar) { }
     
@@ -96,11 +96,19 @@ class NativeAdView: NSObject, FlutterPlugin, FlutterStreamHandler, FlutterPlatfo
     /* create html native view */
     func view() -> UIView {
         self.nativeWebView = WKWebView()
-        nativeWebView!.backgroundColor = UIColor.clear
-        nativeWebView!.loadHTMLString(self.htmlData, baseURL: nil)
-        self.nativeWebView?.navigationDelegate = self
-        self.nativeWebView?.uiDelegate = self
-        return nativeWebView!
+        self.nativeWebView!.backgroundColor = UIColor.clear
+        self.nativeWebView!.navigationDelegate = self
+        self.nativeWebView!.uiDelegate = self
+        self.nativeWebView!.configuration.preferences.javaScriptEnabled = true
+        
+        if let contentController = self.nativeWebView?.configuration.userContentController {
+            let source = "function captureLog(msg) { window.webkit.messageHandlers.errorHandler.postMessage(msg); } window.onerror = captureLog;"
+            let script = WKUserScript(source: source, injectionTime: .atDocumentEnd, forMainFrameOnly: false)
+            contentController.addUserScript(script)
+            contentController.add(self, name: "errorHandler")
+        }
+        self.nativeWebView!.loadHTMLString(self.htmlData, baseURL: nil)
+        return self.nativeWebView!
     }
     
     func onDataChanged(data:String) {
@@ -112,10 +120,22 @@ class NativeAdView: NSObject, FlutterPlugin, FlutterStreamHandler, FlutterPlatfo
         if navigationAction.targetFrame == nil, let url = navigationAction.request.url {
             if url.description.lowercased().range(of: "http://") != nil || url.description.lowercased().range(of: "https://") != nil {
                 UIApplication.shared.openURL(url)
-//                onLinkOpened(url: url.absoluteString)
+                onAdClicked(url: url.absoluteString)
             }
         }
         return nil
+    }
+    func webView(_ webView: WKWebView,
+                 didFinish navigation: WKNavigation!) {
+        webView.evaluateJavaScript("document.getElementsByTagName('ins')[0].style.display") { (html: Any?, error: Error?) in
+            if(error == nil && html is String && html as! String == "inline") {
+                self.onAdLoaded()
+            }
+        }
+    }
+    
+    func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        self.onError(message: error.localizedDescription)
     }
  
     @available(iOS 10.0, *)
@@ -135,7 +155,7 @@ class NativeAdView: NSObject, FlutterPlugin, FlutterStreamHandler, FlutterPlatfo
         if(navigationAction.navigationType == WKNavigationType.linkActivated) {
             if let url = navigationAction.request.url {
                 if (url.absoluteString.starts(with: "http")) {
-                    //onLinkOpened(url: url.absoluteString)
+                    onAdClicked(url: url.absoluteString)
                     if #available(iOS 10.0, *) {
                         UIApplication.shared.open(url, options: [:], completionHandler: nil)
                     } else {
@@ -147,11 +167,25 @@ class NativeAdView: NSObject, FlutterPlugin, FlutterStreamHandler, FlutterPlatfo
         decisionHandler(.allow)
     }
     
-    func onLinkOpened(url:String) -> Void {
-        self.flutterEventSink?(["event":"onLinkOpened", "url": url])
+    func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
+        if message.name == "errorHandler" {
+            self.onAdFailedToLoad(message: "\(message.body)")
+        }
     }
     
-    func onError(message:String) -> Void {
+    private func onAdLoaded() -> Void {
+        self.flutterEventSink?(["event":"onAdLoaded"])
+    }
+    
+    private func onAdClicked(url:String?) -> Void {
+        self.flutterEventSink?(["event":"onAdClicked", "message": url])
+    }
+    
+    private func onAdFailedToLoad(message:String?) -> Void {
+        self.flutterEventSink?(["event":"onAdFailedToLoad", "message": message])
+    }
+
+    private func onError(message:String?) -> Void {
         self.flutterEventSink?(["event":"onError", "message": message])
     }
     

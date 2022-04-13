@@ -21,6 +21,8 @@ class FlutterCoupangAd {
   /// - Android : https://github.com/coupang-ads-sdk/android/blob/main/coupang-ads-sdk-v1.0.1.pdf
   /// - iOS : not implemented
   static Future<Map?> init(String affiliateId, {String? subId}) {
+    _affiliateId = affiliateId;
+    _subId = subId;
     if (_sdkInitialized) {
       return Future.value({'affiliateId': _affiliateId, 'subId': _subId});
     }

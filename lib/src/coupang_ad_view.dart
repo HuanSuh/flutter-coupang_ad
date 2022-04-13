@@ -163,6 +163,7 @@ class _CoupangAdViewState extends State<CoupangAdView> {
         '"id":$adId,'
         '"template":"carousel",'
         '"trackingCode": "${FlutterCoupangAd._affiliateId}",'
+        '"subId": "${FlutterCoupangAd._subId}",'
         '"width":"${width.toInt()}",'
         '"height":"${height.toInt()}"'
         '});</script>';

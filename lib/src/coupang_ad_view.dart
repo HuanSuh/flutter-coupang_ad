@@ -5,12 +5,14 @@ class CoupangAdView extends StatefulWidget {
   final CoupangAdSize size;
   final OnCoupangAdEvent? listener;
   final bool fillWidth;
+  final bool dynamicAd;
 
   const CoupangAdView({
     required this.adId,
     this.size = CoupangAdSize.smart,
     this.listener,
     this.fillWidth = false,
+    this.dynamicAd = true,
     Key? key,
   }) : super(key: key);
 
@@ -33,7 +35,8 @@ class _CoupangAdViewState extends State<CoupangAdView> {
     if (oldWidget.adId != widget.adId ||
         oldWidget.fillWidth != widget.fillWidth ||
         oldWidget.size.width != widget.size.width ||
-        oldWidget.size.height != widget.size.height) {
+        oldWidget.size.height != widget.size.height ||
+        oldWidget.dynamicAd != widget.dynamicAd) {
       _onDataChanged(widget.adId);
     }
     super.didUpdateWidget(oldWidget);
@@ -41,10 +44,7 @@ class _CoupangAdViewState extends State<CoupangAdView> {
 
   void _onDataChanged(String adId) {
     hasError = false;
-    _channel.invokeMethod(
-      "onDataChanged",
-      {"data": _constructHTMLData(adId)},
-    );
+    _channel.invokeMethod("onDataChanged", _buildParams(adId));
   }
 
   double _bannerWidth = 0, _bannerHeight = 0;
@@ -76,7 +76,7 @@ class _CoupangAdViewState extends State<CoupangAdView> {
           }
           return SizedBox(
             width: width,
-            height: _hasError ? 0 : height,
+            height: height,
             child: _buildAdView(),
           );
         },
@@ -93,14 +93,14 @@ class _CoupangAdViewState extends State<CoupangAdView> {
     if (Platform.isAndroid) {
       return AndroidView(
         viewType: 'flutter.coupang.ad/CoupangAdView',
-        creationParams: {"data": _constructHTMLData(widget.adId)},
+        creationParams: _buildParams(widget.adId),
         creationParamsCodec: const JSONMessageCodec(),
         onPlatformViewCreated: (viewId) => _onPlatformViewCreated(viewId),
       );
     } else if (Platform.isIOS) {
       return UiKitView(
         viewType: 'flutter.coupang.ad/CoupangAdView',
-        creationParams: {"data": _constructHTMLData(widget.adId)},
+        creationParams: _buildParams(widget.adId),
         creationParamsCodec: const JSONMessageCodec(),
         onPlatformViewCreated: (viewId) => _onPlatformViewCreated(viewId),
       );
@@ -140,20 +140,29 @@ class _CoupangAdViewState extends State<CoupangAdView> {
     }
   }
 
-  String _constructHTMLData(String adId) {
+  Map<String, dynamic> _buildParams(String adId) {
     double width = _bannerWidth;
     double height = _bannerHeight;
     if (Platform.isIOS) {
       width *= MediaQuery.of(context).devicePixelRatio;
       height *= MediaQuery.of(context).devicePixelRatio;
     }
+    return {
+      'adId': adId,
+      'width': width.toInt(),
+      'height': height.toInt(),
+      'useSDKView': FlutterCoupangAd._sdkInitialized && widget.dynamicAd,
+      'data': _constructHTMLData(adId, width, height),
+    };
+  }
+
+  String _constructHTMLData(String adId, double width, double height) {
     String cleanHTML =
         '<script src="https://ads-partners.coupang.com/g.js"></script>'
         '<script>new PartnersCoupang.G({'
         '"id":$adId,'
         '"template":"carousel",'
-        // '"trackingCode":${FlutterCoupangAd._affiliateId},'
-        // '"subId":${FlutterCoupangAd._subId},'
+        '"trackingCode": "${FlutterCoupangAd._affiliateId}",'
         '"width":"${width.toInt()}",'
         '"height":"${height.toInt()}"'
         '});</script>';

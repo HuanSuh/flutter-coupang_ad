@@ -4,7 +4,7 @@ import 'package:flutter_coupang_ad/flutter_coupang_ad.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await FlutterCoupangAd.init('AF2693277', subId: 'dfhowmuch');
+  await FlutterCoupangAd.init('<AFFILIATE_ID>', subId: '<SUB_ID>');
   runApp(const MyApp());
 }
 
@@ -20,15 +20,14 @@ class _MyAppState extends State<MyApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Scaffold(
-        backgroundColor: Colors.red,
         appBar: AppBar(title: const Text('Flutter Coupang Ad')),
         body: Center(
           child: CoupangAdView(
-            adId: '575249',
+            adId: '<AdID>',
             size: CoupangAdSize.banner,
             fillWidth: true,
+            dynamicAd: true,
             listener: (event, data) {
-              print('$event : ${data.toString()}');
               switch (event) {
                 case CoupangAdEvent.onAdClicked:
                   break;

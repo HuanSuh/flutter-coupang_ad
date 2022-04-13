@@ -10,14 +10,14 @@ import io.flutter.plugin.platform.PlatformViewFactory
 class AdViewFactory
     private constructor(private val messenger: BinaryMessenger, private val context: Context)
     : PlatformViewFactory(JSONMessageCodec.INSTANCE) {
-    private var webView: NativeAdView? = null
-    override fun create(context: Context, id: Int, args: Any): NativeAdView? {
-        webView = NativeAdView(context, messenger, id, args)
-        return webView
+    private var adView: CoupangAdView? = null
+    override fun create(context: Context, id: Int, args: Any): CoupangAdView? {
+        adView = CoupangAdView(context, messenger, id, args)
+        return adView
     }
 
     fun onDestroy() {
-        webView?.dispose()
+        adView?.dispose()
     }
 
     companion object {
